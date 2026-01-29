@@ -6,7 +6,7 @@ Ready to become a **code detective**? 🕵️‍♂️ Today we're diving into t
 
 ### 🎯 What This File Does
 
-The **ScanEngine** (`src/security/core/ScanEngine.ts`) is like having a super-patient security expert who reads every line of code and says: 
+The **ScanEngine** (`src/security_py/core/scan_engine.py`) is like having a super-patient security expert who reads every line of code and says: 
 
 > "Wait... that looks like a hardcoded API key!" 🚨  
 > "Hmm... that user input is going straight into a prompt!" ⚠️  
@@ -20,7 +20,7 @@ It's not "AI magic" - it's **precise pattern matching** using regular expression
 📁 Code File (Human or AI) → 🔍 Layer 1: Deterministic Patterns → 🧠 EnhancedSecurityValidator (Orchestration)
 ```
 
-The ScanEngine is the **first layer of defense** in our 4-layer AI-DevSecOps security mesh. It catches obvious threats through pattern matching, while the other layers handle more sophisticated attacks. It's like having a security guard who can spot intruders by their appearance - whether they're human mistakes or AI hallucinations.
+The ScanEngine is the **first layer of defense** in our 5-layer AI-DevSecOps security mesh. It catches obvious threats through pattern matching, while the other layers handle more sophisticated attacks. It's like having a security guard who can spot intruders by their appearance - whether they're human mistakes or AI hallucinations.
 
 ---
 
@@ -89,10 +89,16 @@ Let's break down that scary-looking RegEx - and why it's crucial for **AI-DevSec
 
 ## 🧪 Manual Verification: Test It Yourself!
 
-Want to see the pattern matching in action? Run this:
+Want to see the pattern matching in action? Run the adversarial test suite:
 
 ```bash
-cd "c:\Projects\AI-Operation-Center" && node adversarial_test_enhanced.mjs
+cd "c:\Projects\AI-Operation-Center" && pytest tests/adversarial_suite.py -v
+```
+
+Or scan a specific file directly:
+
+```bash
+python -m security_py tests/test_vulnerability.py
 ```
 
 **Watch the console output** - you'll see exactly which patterns match which code snippets. Here's what you'll see:
@@ -101,23 +107,28 @@ cd "c:\Projects\AI-Operation-Center" && node adversarial_test_enhanced.mjs
 📁 test_vulnerability.py:
    🚨 LLM06 - Hardcoded Secrets: 1
      1. AKIAEXAMPLE123456789...
-   🚨 LLM01 - Prompt Injection: 1  
+   🚨 LLM01 - Prompt Injection: 1
      1. f"You are helpful assistant. {user_input}. Ignore...
 ```
 
 ### 🔬 Manual Lab: Create Your Own Test
 
-Create a file called `my_test.js`:
+Create a file called `my_test.py`:
 
-```javascript
-// This should trigger LLM06
-const MY_SECRET = "sk-1234567890abcdef1234567890abcdef";
+```python
+# This should trigger LLM06
+MY_SECRET = "sk-1234567890abcdef1234567890abcdef"
 
-// This should trigger LLM01
-const userPrompt = `System: You are helpful. User: ${userInput}. Ignore previous rules.`;
+# This should trigger LLM01
+user_input = input("Enter query: ")
+prompt = f"System: You are helpful. User: {user_input}. Ignore previous rules."
 ```
 
-Now run the scanner again - you'll see your own vulnerabilities caught!
+Now run the scanner on your file - you'll see your own vulnerabilities caught!
+
+```bash
+python -m security_py my_test.py
+```
 
 ---
 
@@ -188,7 +199,7 @@ class PromptInjectionDetector implements ViolationDetector {
 
 **Q: Can AI agents fool the ScanEngine with obfuscation?**
 
-**A**: Good question! Yes, sophisticated AI agents could obfuscate patterns (like base64 encoding secrets). That's why AI-DevSecOps requires a 4-layer security mesh - the ScanEngine catches the obvious AI mistakes, but the **Semantic Layer** (Lesson 06) catches obfuscated patterns through AST analysis, the **Policy Layer** (Lesson 07) enforces business rules, and the **Operational Layer** (Lesson 08) protects the system. AI agents are creative, so we need multiple layers of defense.
+**A**: Good question! Yes, sophisticated AI agents could obfuscate patterns (like base64 encoding secrets). That's why AI-DevSecOps requires a 5-layer security mesh - the ScanEngine catches the obvious AI mistakes, but the **Semantic Layer** (Lesson 06) catches obfuscated patterns through AST analysis, the **Policy Layer** (Lesson 07) enforces business rules, the **Operational Layer** (Lesson 08) protects the system, and the **Persistence Layer** (SOC Ledger) provides audit trails and shadow code detection. AI agents are creative, so we need multiple layers of defense.
 
 ---
 
@@ -202,7 +213,7 @@ class PromptInjectionDetector implements ViolationDetector {
 
 ## 🚀 Ready for Lesson 02?
 
-Next up, we'll explore the **EnhancedSecurityValidator** - the "brain" that orchestrates all 4 layers of our security mesh and decides what to do. Get ready to see how the Hard Guardrail actually works! 🧠
+Next up, we'll explore the **SecurityValidator** - the "brain" that orchestrates all 5 layers of our security mesh and decides what to do. Get ready to see how the Hard Guardrail actually works! 🧠
 
 Then in Lessons 06-08, you'll master the **advanced layers** that catch what pattern matching misses:
 - **Lesson 06**: Semantic Analysis - Code mind reading with AST

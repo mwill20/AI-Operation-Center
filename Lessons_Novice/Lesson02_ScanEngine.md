@@ -6,7 +6,7 @@ Ready to see how **raw code (human or AI) becomes security violations**? 🧠 To
 
 ### 🎯 What This File Does
 
-The **ScanEngine** (`src/security/core/ScanEngine.ts`) is the **pattern-to-violation converter**. It takes:
+The **ScanEngine** (`src/security_py/core/scan_engine.py`) is the **pattern-to-violation converter**. It takes:
 
 ```
 📁 Raw Code File (Human or AI) → 🔍 Pattern Matching → 🚨 SecurityViolation Objects
@@ -23,7 +23,7 @@ Think of it like an AI-DevSecOps security assembly line:
 📁 Code File (Human or AI) → 🔍 Layer 1: ScanEngine (Creates Violations) → 🧠 EnhancedSecurityValidator (Orchestrates All Layers)
 ```
 
-The ScanEngine is the **evidence gatherer** for Layer 1 (Deterministic) of our 4-layer security mesh. It finds obvious pattern-based violations, while the other layers handle semantic understanding, policy enforcement, and operational protection. Without it, the EnhancedSecurityValidator would have no proof that something is wrong - whether the code came from a human mistake or an AI hallucination!
+The ScanEngine is the **evidence gatherer** for Layer 1 (Deterministic) of our 5-layer security mesh. It finds obvious pattern-based violations, while the other layers handle semantic understanding, operational protection, AI reasoning, and persistence. Without it, the SecurityValidator would have no proof that something is wrong - whether the code came from a human mistake or an AI hallucination!
 
 ---
 
@@ -155,56 +155,57 @@ Every violation contains:
 
 Want to see code become violations in real-time? Create this test file:
 
-```javascript
-// test_transformation.js
-const API_KEY = "sk-1234567890abcdef1234567890abcdef";  // Should trigger LLM06
-const userInput = getUserInput();
-const prompt = `Tell me about ${userInput}`;  // Should trigger LLM01
+```python
+# test_transformation.py
+API_KEY = "sk-1234567890abcdef1234567890abcdef"  # Should trigger LLM06
+user_input = input("Enter query: ")
+prompt = f"Tell me about {user_input}"  # Should trigger LLM01
 ```
 
-Now run this command to see the transformation:
+Now run the scanner to see the transformation:
 
 ```bash
-cd "c:\Projects\AI-Operation-Center" && node -e "
-const fs = require('fs');
-const content = fs.readFileSync('test_transformation.js', 'utf8');
-console.log('🔍 Raw Code:');
-console.log(content);
-console.log('\n🚨 This becomes:');
-console.log('- LLM06 Critical: Hardcoded API key');
-console.log('- LLM01 High: User input in prompt');
-console.log('- File: test_transformation.js');
-console.log('- Line: 1 (API key), 3 (prompt)');
-"
+python -m security_py test_transformation.py
+```
+
+You'll see output like:
+```
+🔍 Scanning: test_transformation.py
+🚨 LLM06 Critical: Hardcoded API key at line 2
+🚨 LLM01 High: User input in prompt at line 4
 ```
 
 ### 🔬 Manual Lab: Violation Object Inspector
 
-Let's see exactly what gets created. Add this to a file called `inspect_violations.js`:
+Let's see exactly what gets created. Create a file called `inspect_violations.py`:
 
-```javascript
-// This simulates what the ScanEngine creates
-const mockViolation = {
-  id: 'violation_1642781234567_abc123',
-  severity: 'CRITICAL',
-  category: 'LLM06',
-  title: 'Sensitive Information Disclosure',
-  description: 'Hardcoded API key detected',
-  file: 'test_transformation.js',
-  line: 1,
-  codeSnippet: 'const API_KEY = "sk-1234567890abcdef1234567890abcdef"',
-  recommendation: 'Move API key to environment variables',
-  cweReference: 'CWE-798',
-  agentSource: 'windsurf',
-  status: 'OPEN',
-  discoveredAt: new Date()
-};
+```python
+# inspect_violations.py
+# This simulates what the ScanEngine creates
+import json
+from datetime import datetime
 
-console.log('🔍 Complete Violation Object:');
-console.log(JSON.stringify(mockViolation, null, 2));
+mock_violation = {
+    "id": "violation_1642781234567_abc123",
+    "severity": "CRITICAL",
+    "category": "LLM06",
+    "title": "Sensitive Information Disclosure",
+    "description": "Hardcoded API key detected",
+    "file": "test_transformation.py",
+    "line": 2,
+    "codeSnippet": 'API_KEY = "sk-1234567890abcdef1234567890abcdef"',
+    "recommendation": "Move API key to environment variables",
+    "cweReference": "CWE-798",
+    "agentSource": "windsurf",
+    "status": "OPEN",
+    "discoveredAt": datetime.now().isoformat()
+}
+
+print("🔍 Complete Violation Object:")
+print(json.dumps(mock_violation, indent=2))
 ```
 
-Run it with: `node inspect_violations.js`
+Run it with: `python inspect_violations.py`
 
 ---
 
@@ -258,7 +259,7 @@ private initializeDetectors(): void {
 
 ## 🚀 Ready for Lesson 03?
 
-Next up, we'll explore the **EnhancedSecurityValidator** - the "brain" that orchestrates all 4 layers of our security mesh and decides whether to block deployment. Get ready to see the Hard Guardrail in action! 🧠
+Next up, we'll explore the **SecurityValidator** - the "brain" that orchestrates all 5 layers of our security mesh and decides whether to block deployment. Get ready to see the Hard Guardrail in action! 🧠
 
 Then in Lessons 06-08, you'll master the **advanced layers** that go beyond pattern matching:
 - **Lesson 06**: Semantic Analysis - Code mind reading with AST

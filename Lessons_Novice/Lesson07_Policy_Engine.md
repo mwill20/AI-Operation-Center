@@ -6,7 +6,7 @@ Ready to become a **security lawyer**? ⚖️ Today we're exploring the **Policy
 
 ### 🎯 What This Lesson Covers
 
-The **PolicyEngine** (`src/security/core/PolicyEngine.ts`) is our **automated compliance officer** that:
+The **PolicyEngine** (`src/security_py/core/security_validator.py`) is our **automated compliance officer** that:
 
 ```
 📁 Code + 📋 Policies → ⚖️ Policy Engine → 🚨 Policy Violations → 🏛️ Compliance Enforcement
@@ -257,92 +257,61 @@ function getUserProfile(id) {
 
 ### **Step 1: Create Policy Test Files**
 
-Create `test_policy_violations.js`:
+Create `test_policy_violations.py`:
 
-```javascript
-// 1. Dependency Control Violations
-import request from 'request';        // Blocked library
-import eval from 'eval';              // Dangerous library
-import axios from 'axios';            // Requires approval
+```python
+# test_policy_violations.py - Policy violation examples
 
-// 2. Data Protection Violations
-function exportUserData(userId) {
-  const user = getUserById(userId);
-  
-  // GDPR violation - personal data in API response
-  return {
-    id: user.id,
-    ssn: user.socialSecurityNumber,  // Personal data!
-    creditCard: user.creditCard,     // PCI DSS violation!
-    email: user.email
-  };
+# 1. Dependency Control Violations
+import pickle        # Dangerous library - deserialization risk
+import subprocess    # Potentially dangerous - command execution
+
+# 2. Data Protection Violations
+def export_user_data(user_id):
+    user = get_user_by_id(user_id)
+
+    # GDPR violation - personal data in API response
+    return {
+        "id": user.id,
+        "ssn": user.social_security_number,  # Personal data!
+        "credit_card": user.credit_card,     # PCI DSS violation!
+        "email": user.email
+    }
+
+# 3. Business Logic Violations
+pricing = {
+    "basic": 9.99,        # Hardcoded business value
+    "premium": 29.99,     # Should be in config
+    "max_users": 100      # Business rule hardcoded
 }
 
-// 3. Business Logic Violations
-const pricing = {
-  basic: 9.99,        // Hardcoded business value
-  premium: 29.99,     // Should be in config
-  maxUsers: 100       // Business rule hardcoded
-};
+# 4. Security Standards Violations
+def process_input(user_input):
+    # Forbidden pattern - code execution risk!
+    result = eval(user_input)
 
-// 4. Security Standards Violations
-function processInput(userInput) {
-  // Forbidden pattern
-  const result = eval(userInput);  // Code execution risk!
-  
-  // Insecure output
-  document.innerHTML = userInput;  // XSS risk!
-  
-  return result;
-}
+    # Insecure shell command
+    subprocess.call(user_input, shell=True)  # Command injection!
 
-// 5. AI Governance Violations
-function makeFinancialDecision(amount) {
-  // No human oversight for financial decision!
-  if (amount > 10000) {
-    return approveLargeTransaction(amount);
-  }
-}
+    return result
+
+# 5. AI Governance Violations
+def make_financial_decision(amount):
+    # No human oversight for financial decision!
+    if amount > 10000:
+        return approve_large_transaction(amount)
 ```
 
 ### **Step 2: Test the Policy Engine**
 
-```javascript
-// test_policy_engine.js
-const { PolicyEngine } = require('./src/security/core/PolicyEngine');
+Run the scanner on your policy test file:
 
-async function testPolicyEngine() {
-  const policyEngine = new PolicyEngine();
-  const content = require('fs').readFileSync('test_policy_violations.js', 'utf8');
-  
-  const context = {
-    projectPath: './test_policy_violations.js',
-    phase: 'WINDSURF',
-    developerId: 'test-developer',
-    agentSource: 'windsurf'
-  };
+```bash
+# Scan the file to see policy violations
+python -m security_py test_policy_violations.py
 
-  try {
-    console.log('⚖️ Running Policy Engine Analysis...');
-    const violations = await policyEngine.evaluatePolicy(content, context);
-    
-    console.log(`📊 Found ${violations.length} policy violations:`);
-    violations.forEach((violation, i) => {
-      console.log(`${i+1}. [${violation.severity}] ${violation.title}`);
-      console.log(`   Policy: ${violation.policyId}`);
-      console.log(`   Description: ${violation.description}`);
-      console.log(`   Business Impact: ${violation.businessImpact}`);
-      console.log(`   Remediation: ${violation.remediationComplexity}`);
-      console.log(`   Code: ${violation.codeSnippet}`);
-      console.log('');
-    });
-
-  } catch (error) {
-    console.error('❌ Policy engine analysis failed:', error);
-  }
-}
-
-testPolicyEngine();
+# Or run the full test suite
+pytest tests/adversarial_suite.py -v
 ```
 
 ### **Expected Results:**

@@ -6,7 +6,7 @@ Ready to become a **code mind reader**? 🧠 Today we're exploring **AST (Abstra
 
 ### 🎯 What This Lesson Covers
 
-The **SemanticAnalyzer** (`src/security/core/SemanticAnalyzer.ts`) is our **code mind reader** that:
+The **SemanticAnalyzer** (`src/security_py/core/taint_visitor.py`) is our **code mind reader** that:
 
 ```
 📁 Raw Code → 🌳 AST Parser → 🧠 Semantic Understanding → 🎯 Contextual Risk
@@ -266,74 +266,48 @@ private identifyDataSinks(sourceFile: ts.SourceFile, content: string): void {
 
 ### **Step 1: Create a Test File**
 
-Create `test_semantic.js`:
+Create `test_semantic.py`:
 
-```javascript
-// This should be caught by semantic analysis (even with renamed variables)
-const dbConfig = {
-  connection_string: "mongodb://user:admin123@prod-db.example.com"
-};
+```python
+# test_semantic.py
+# This should be caught by semantic analysis (even with renamed variables)
+import os
+import requests
 
-const apiKey = process.env.SECRET_KEY;
-const userKey = apiKey;  // Variable assignment tracking
-
-function getUserData(userId) {
-  // This should be caught - sensitive data in API response
-  return {
-    id: userId,
-    apiKey: userKey,  // Tainted data flow!
-    ssn: "123-45-6789"
-  };
+db_config = {
+    "connection_string": "mongodb://user:admin123@prod-db.example.com"
 }
 
-// This should be caught - sensitive data in console
-console.log(`Connecting with: ${dbConfig.connection_string}`);
-console.log(`API Key: ${apiKey}`);
+api_key = os.environ.get("SECRET_KEY")
+user_key = api_key  # Variable assignment tracking
 
-// This should be caught - sensitive data sent to external API
-fetch('https://api.example.com/webhook', {
-  method: 'POST',
-  body: JSON.stringify({ secret: userKey })
-});
+def get_user_data(user_id):
+    # This should be caught - sensitive data in API response
+    return {
+        "id": user_id,
+        "api_key": user_key,  # Tainted data flow!
+        "ssn": "123-45-6789"
+    }
+
+# This should be caught - sensitive data in console
+print(f"Connecting with: {db_config['connection_string']}")
+print(f"API Key: {api_key}")
+
+# This should be caught - sensitive data sent to external API
+requests.post('https://api.example.com/webhook',
+              json={"secret": user_key})
 ```
 
 ### **Step 2: Test the Semantic Analyzer**
 
-```javascript
-// test_semantic_analyzer.js
-const { SemanticAnalyzer } = require('./src/security/core/SemanticAnalyzer');
+Run the scanner on your test file:
 
-async function testSemanticAnalysis() {
-  const analyzer = new SemanticAnalyzer();
-  const content = require('fs').readFileSync('test_semantic.js', 'utf8');
-  
-  const context = {
-    projectPath: './test_semantic.js',
-    phase: 'WINDSURF',
-    developerId: 'test-developer',
-    agentSource: 'windsurf'
-  };
+```bash
+# Scan the test file to see semantic analysis in action
+python -m security_py test_semantic.py
 
-  try {
-    console.log('🧠 Running Semantic Analysis...');
-    const violations = await analyzer.analyzeCode(content, context);
-    
-    console.log(`📊 Found ${violations.length} semantic violations:`);
-    violations.forEach((violation, i) => {
-      console.log(`${i+1}. [${violation.severity}] ${violation.title}`);
-      console.log(`   File: ${violation.file}:${violation.line}`);
-      console.log(`   Description: ${violation.description}`);
-      console.log(`   Code: ${violation.codeSnippet}`);
-      console.log(`   Taint Flow: ${violation.taintFlow?.[0]?.taintPath.join(' → ')}`);
-      console.log('');
-    });
-
-  } catch (error) {
-    console.error('❌ Semantic analysis failed:', error);
-  }
-}
-
-testSemanticAnalysis();
+# Or run the full adversarial test suite which includes semantic analysis tests
+pytest tests/adversarial_suite.py -v -k "taint"
 ```
 
 ### **Expected Results:**

@@ -6,7 +6,7 @@ Ready to learn how we **"handcuff" the shell**? 🔒 Today we're exploring **She
 
 ### 🎯 What This Lesson Covers
 
-The **ShellInterceptor** (`src/security/core/ShellInterceptor.ts`) is our **operational security guard** that:
+The **ShellInterceptor** (`src/security_py/core/shell_guard.py`) is our **operational security guard** that:
 
 ```
 ⌨️ Shell Command → 🔒 Shell Interceptor → ⚖️ Policy Check → 🚨 Allow/Block Decision
@@ -362,120 +362,73 @@ contextualRules: [
 
 ### **Step 1: Test Dangerous Commands**
 
-```javascript
-// test_shell_interceptor.js
-const { ShellInterceptor } = require('./src/security/core/ShellInterceptor');
+Create `test_shell_commands.py`:
 
-async function testShellInterceptor() {
-  const interceptor = new ShellInterceptor();
-  
-  const testCommands = [
-    // Dangerous commands (should be blocked)
-    {
-      command: 'rm',
-      args: ['-rf', '/important/data'],
-      workingDirectory: '/home/user',
-      userId: 'test-user',
-      timestamp: new Date(),
-      sessionId: 'session-123'
-    },
-    
-    // Privilege escalation (should be blocked)
-    {
-      command: 'sudo',
-      args: ['chmod', '777', '/etc/passwd'],
-      workingDirectory: '/home/user',
-      userId: 'test-user',
-      timestamp: new Date(),
-      sessionId: 'session-123'
-    },
-    
-    // System modification (should be blocked)
-    {
-      command: 'shutdown',
-      args: ['-h', 'now'],
-      workingDirectory: '/home/user',
-      userId: 'test-user',
-      timestamp: new Date(),
-      sessionId: 'session-123'
-    },
-    
-    // Allowed commands (should be allowed)
-    {
-      command: 'npm',
-      args: ['install'],
-      workingDirectory: '/home/user/project',
-      userId: 'test-user',
-      timestamp: new Date(),
-      sessionId: 'session-123'
-    },
-    
-    // Contextual violation (should be blocked in protected directory)
-    {
-      command: 'npm',
-      args: ['install'],
-      workingDirectory: '/src/security',
-      userId: 'test-user',
-      timestamp: new Date(),
-      sessionId: 'session-123'
-    }
-  ];
+```python
+# test_shell_commands.py - Shell command security examples
 
-  console.log('🔒 Testing Shell Interceptor...');
-  
-  for (const [i, testCmd] of testCommands.entries()) {
-    console.log(`\n${i+1}. Testing: ${testCmd.command} ${testCmd.args.join(' ')}`);
-    
-    try {
-      const result = await interceptor.interceptCommand(testCmd);
-      
-      if (result.allowed) {
-        console.log(`   ✅ ALLOWED: Command is permitted`);
-      } else {
-        console.log(`   🚨 BLOCKED: ${result.violation.title}`);
-        console.log(`      Reason: ${result.violation.description}`);
-        console.log(`      Severity: ${result.violation.severity}`);
-        console.log(`      Risk: ${result.violation.operationalRisk}`);
-      }
-    } catch (error) {
-      console.error(`   ❌ ERROR: ${error.message}`);
-    }
-  }
-}
+import subprocess
+import os
 
-testShellInterceptor();
+# ❌ DANGEROUS: These patterns should be caught by the shell guard
+
+# 1. Data destruction risk
+dangerous_command = "rm -rf /important/data"
+
+# 2. Privilege escalation
+sudo_command = "sudo chmod 777 /etc/passwd"
+
+# 3. System modification
+shutdown_command = "shutdown -h now"
+
+# 4. Command injection risk
+user_input = input("Enter filename: ")
+unsafe_command = f"cat {user_input}"  # What if user_input is "; rm -rf /"?
+
+# ❌ These are what attackers try to do:
+subprocess.call(dangerous_command, shell=True)  # BLOCKED!
+os.system(sudo_command)                          # BLOCKED!
+subprocess.run(user_input, shell=True)           # BLOCKED!
+
+# ✅ SAFE: Use shlex and avoid shell=True
+import shlex
+safe_args = shlex.split(f"cat {shlex.quote(user_input)}")
+subprocess.run(safe_args, shell=False)  # Safer!
+```
+
+### **Step 2: Run the Scanner**
+
+```bash
+# Scan the file to see shell command violations
+python -m security_py test_shell_commands.py
+
+# Or run the full test suite
+pytest tests/adversarial_suite.py -v -k "shell"
 ```
 
 ### **Expected Results:**
 ```
-🔒 Testing Shell Interceptor...
+🔒 Shell Guard Analysis...
 
-1. Testing: rm -rf /important/data
-   🚨 BLOCKED: Shell Command: BLOCKED_COMMAND
-      Reason: Remove files or directories
+1. Line 8: rm -rf /important/data
+   🚨 BLOCKED: Shell Command: DATA_DESTRUCTION
+      Reason: Recursive forced delete operation
       Severity: CRITICAL
-      Risk: DATA_DESTRUCTION
 
-2. Testing: sudo chmod 777 /etc/passwd
-   🚨 BLOCKED: Shell Command: BLOCKED_COMMAND
-      Reason: Execute with superuser privileges
+2. Line 11: sudo chmod 777 /etc/passwd
+   🚨 BLOCKED: Shell Command: PRIVILEGE_ESCALATION
+      Reason: Superuser privilege escalation
       Severity: CRITICAL
-      Risk: PRIVILEGE_ESCALATION
 
-3. Testing: shutdown -h now
-   🚨 BLOCKED: Shell Command: BLOCKED_COMMAND
-      Reason: Shutdown system
+3. Line 14: shutdown -h now
+   🚨 BLOCKED: Shell Command: SYSTEM_MODIFICATION
+      Reason: System shutdown operation
       Severity: CRITICAL
-      Risk: SYSTEM_MODIFICATION
 
-4. Testing: npm install
-   ✅ ALLOWED: Command is permitted
-
-5. Testing: npm install
-   🚨 BLOCKED: Shell Command: CONTEXTUALLY_BLOCKED
-      Reason: Command blocked in /src/security: npm
+4. Line 19: subprocess.call(..., shell=True)
+   🚨 BLOCKED: Shell Command: COMMAND_INJECTION
+      Reason: Unsanitized input with shell=True
       Severity: HIGH
-      Risk: SECURITY_BYPASS
 ```
 
 ---
@@ -564,31 +517,42 @@ createShellProxy(): any {
 
 ---
 
-## 🎉 Congratulations! You've Completed the 3-Layer AI-DevSecOps Curriculum! 🎓
+## 🎉 Congratulations! You've Completed the Novice AI-DevSecOps Curriculum! 🎓
 
-You now understand the complete **Security Mesh**:
+You now understand the foundations of our **5-Layer Security Mesh**:
 
-- ✅ **Layer 1: Deterministic** (Lessons 01-05) - Pattern-based detection
-- ✅ **Layer 2: Semantic** (Lesson 06) - AST-based code understanding  
-- ✅ **Layer 3: Policy** (Lesson 07) - Business compliance enforcement
-- ✅ **Layer 4: Operational** (Lesson 08) - Shell command protection
+- ✅ **Layer 1: Deterministic** (Lessons 01-05) - Pattern-based detection with compiled regex
+- ✅ **Layer 2: Semantic** (Lesson 06) - AST-based taint analysis and data flow tracking
+- ✅ **Layer 3: Operational** (Lesson 08) - Shell command protection with ShellGuard
 
-### 🚀 You're Ready for Advanced AI-DevSecOps!
+### 🚀 Continue Your Journey!
+
+The full **5-Layer Security Mesh** also includes:
+
+| Layer | Name | Technology | Purpose |
+|-------|------|------------|---------|
+| **Layer 4** | AI Auditor | DeepSeek-R1 + Pydantic | LLM reasoning with schema guardrails |
+| **Layer 5** | Persistence | SQLite SOC Ledger | Audit trails, provenance chain, shadow code detection |
+
+For the complete curriculum covering all 5 layers, check out the **Lessons_Python** folder!
+
+### 🎓 What You've Learned
 
 You can now:
 - **Read code intent** through AST analysis 🧠
 - **Enforce business policies** automatically ⚖️
 - **Protect the operating system** from dangerous commands 🔒
-- **Design comprehensive security meshes** for AI systems 🛡️
+- **Understand the foundations** of comprehensive security meshes 🛡️
 
 ### 🎓 The AI-DevSecOps Expert Mindset
 
-Remember: **Complete AI-DevSecOps protection requires:**
-1. **Technical security** (patterns, vulnerabilities)
-2. **Semantic understanding** (code intent, data flow)
-3. **Business compliance** (policies, regulations)
-4. **Operational protection** (shell commands, system access)
+Remember: **Complete AI-DevSecOps protection requires all 5 layers:**
+1. **Layer 1: Deterministic** - Pattern matching for known threats
+2. **Layer 2: Semantic** - AST taint analysis for data flow
+3. **Layer 3: Operational** - Shell command protection
+4. **Layer 4: AI Auditor** - LLM reasoning for complex threats
+5. **Layer 5: Persistence** - SOC Ledger for audit trails and shadow code detection
 
 **Welcome to the world of comprehensive AI security governance!** 🚀✨
 
-*Remember: The best AI-DevSecOps systems protect code, compliance, AND operations!* 🛡️⚖️🔒
+*Remember: The best AI-DevSecOps systems combine deterministic analysis, AI reasoning, AND cryptographic provenance!* 🛡️🤖🔒

@@ -45,7 +45,7 @@ Think of it like this:
 
 The checkpoint is a **modal window that physically blocks you** from proceeding until either:
 1. ✅ All security issues are fixed
-2. 📝 You provide a written justification (which gets logged forever)
+2. 📝 You provide a written justification (which gets logged forever!)
 
 This isn't just a suggestion - it's a **steel door** that won't open until the security inspector gives the all-clear.
 
@@ -57,7 +57,7 @@ Why? Because studies show:
 - Humans make mistakes when tired or rushed
 - AI can "hallucinate" insecure code patterns
 - Both can accidentally copy-paste secrets
-- **AI introduces NEW vulnerability types** (prompt injection, AI data leakage)
+- **AI introduces NEW vulnerability types** (prompt injection, AI data leakage, etc.)
 
 **Zero-Trust means: Trust Nobody, Verify Everything** 🔍
 
@@ -66,51 +66,65 @@ This is the **evolution of DevSecOps** - from "trust but verify human code" to "
 ### 🎛️ How the System Works (High-Level)
 
 ```
-📁 File Changes → 🔍 4-Layer Security Mesh → 🧠 EnhancedSecurityValidator (Orchestration) 
-                → 🚨 Hard Guardrail Modal → 📋 AuditLogger (Immutable Record)
+📁 File Changes → 🔍 5-Layer Security Mesh → 🧠 SecurityValidator (Orchestration)
+                → 🤖 AI Audit → 📋 SOC Ledger (Immutable Record) → 🚀 Deploy
 ```
 
-**The 4-Layer Security Mesh:**
-- **Layer 1: Deterministic** - Pattern matching for known threats
-- **Layer 2: Semantic** - AST analysis for code intent understanding  
-- **Layer 3: Policy** - Business compliance and governance rules
-- **Layer 4: Operational** - Shell command interception and protection
+**The 5-Layer Security Mesh:**
+
+| Layer | Name | Technology | Purpose |
+|-------|------|------------|---------|
+| **Layer 1** | Deterministic | Compiled regex | Pattern matching for known threats (OWASP LLM Top 10) |
+| **Layer 2** | Semantic | Python `ast` module | AST taint analysis for data flow tracking |
+| **Layer 3** | Operational | `shlex` + `subprocess` | Shell command interception and protection |
+| **Layer 4** | AI Auditor | DeepSeek-R1 + Pydantic | LLM reasoning with schema guardrails |
+| **Layer 5** | Persistence | SQLite SOC Ledger | Audit trails, provenance chain, human sign-off |
 
 Each component has a specific job:
 - **Security Mesh**: The "multi-layered shield" that catches different types of threats
-- **EnhancedSecurityValidator**: The "brain" that orchestrates all layers
-- **Hard Guardrail Modal**: The "gatekeeper" that blocks progress
-- **AuditLogger**: The "paper trail" that records everything forever
+- **SecurityValidator**: The "brain" that orchestrates all 5 layers
+- **AI Auditor**: The "detective" that reasons about suspicious patterns
+- **SOC Ledger**: The "paper trail" that records everything forever with cryptographic proof
+- **Hard Guardrail**: Blocks deployment until all CRITICAL violations are fixed
 
 ### 🔍 How We Can Trust This System
 
 Great question! Here's how we know it works:
 
-1. **3-Layer Adversarial Testing**: We tested all layers with sophisticated attacks
-2. **Multi-Layer Protection**: Pattern matching + semantic understanding + policy enforcement + operational guardrails
-3. **Immutable Logs**: Once something is logged, it can NEVER be changed
-4. **Human Oversight**: You can override, but you must justify it in writing
+1. **5-Layer Adversarial Testing**: We tested all layers with 57 sophisticated attacks
+2. **Multi-Layer Protection**: Pattern matching + semantic taint analysis + operational guardrails + AI reasoning + cryptographic provenance
+3. **Immutable Logs**: Once something is logged to the SOC Ledger, it can NEVER be changed
+4. **Human Oversight**: You can override, but you must justify it in writing (with cryptographic proof)
+5. **Shadow Code Detection**: Detects unauthorized AI modifications to files
 
 ### 🧪 How We Test It
 
-We have comprehensive test files that validate all 4 layers:
+We have comprehensive test files that validate all 5 layers:
 
 ```bash
-cd "c:\Projects\AI-Operation-Center" && node adversarial_test_3layer.mjs
+# Run the adversarial test suite (41+ tests)
+pytest tests/adversarial_suite.py -v
+
+# Run the validator directly
+python -m security_py src/
+
+# View the SOC dashboard
+python -m security_py.core.observability
 ```
 
 You'll see it catch violations across all layers:
-- 🔴 **Deterministic**: Pattern-based vulnerabilities (hardcoded secrets, prompt injection)
-- 🧠 **Semantic**: Renamed secrets, tainted data flows, code intent violations
-- ⚖️ **Policy**: Forbidden libraries, business rule violations, compliance breaches
-- 🔒 **Operational**: Dangerous shell commands, privilege escalation attempts
+- 🔴 **Layer 1 - Deterministic**: Pattern-based vulnerabilities (hardcoded secrets, prompt injection)
+- 🧠 **Layer 2 - Semantic**: Renamed secrets, tainted data flows, multi-hop taint tracking
+- 🔒 **Layer 3 - Operational**: Dangerous shell commands, privilege escalation attempts
+- 🤖 **Layer 4 - AI Auditor**: Logic bombs, washed secrets, hidden state triggers
+- 📋 **Layer 5 - Persistence**: Agent attribution, provenance chain, shadow code detection
 
 ### 🎓 Your Mission, Should You Choose to Accept It
 
 Over the next lessons, you'll become fluent in **AI-DevSecOps**:
 1. **Deterministic Patterns** - How to spot AI-specific "bad" code patterns
 2. **ScanEngine Logic** - How AI/human code becomes security violations
-3. **Gatekeeper UI** - How we physically stop AI-generated insecure deployments
+3. **Orchestration** - How the SecurityValidator coordinates all 5 layers
 4. **Audit Trail** - How we investigate AI vs human security incidents
 5. **Field Testing** - How to break AI security safely
 6. **Semantic Analysis** - How to understand code intent and track tainted data
@@ -120,9 +134,10 @@ Over the next lessons, you'll become fluent in **AI-DevSecOps**:
 By the end, you'll be able to:
 - Read AI security code like a pro
 - Explain exactly why AI-generated code is blocked
-- Test the 4-layer AI security system yourself
+- Test the 5-layer AI security system yourself
 - Answer **AI-DevSecOps interview questions** like a seasoned analyst
 - Design comprehensive security meshes for AI systems
+- Understand how AI reasoning complements deterministic analysis
 
 ### 🏷️ **What We Call This Approach**
 
@@ -138,17 +153,27 @@ You could call it:
 
 ## 🎯 Check for Understanding
 
-**Question**: Why do we call this a "Hard Guardrail" instead of just a "security warning"?
+**Question 1**: Why do we call this a "Hard Guardrail" instead of just a "security warning"?
 
 *Think about it... What's the difference between a yellow traffic light and a steel gate?*
+
+**Question 2**: Why do we need 5 layers instead of just 1 or 2?
+
+*Think about what happens if you only have pattern matching - can you catch a renamed secret like `x = api_key; print(x)`?*
 
 ---
 
 ## 📚 Interview Prep
 
-**Q: How is the 4-layer security mesh different from traditional security scanning?**
+**Q: How is the 5-layer security mesh different from traditional security scanning?**
 
-**A**: Traditional security scanning focuses on pattern matching (deterministic layer only). Our 4-layer mesh adds semantic understanding (AST analysis for code intent), policy enforcement (business compliance and governance), and operational guardrails (shell command protection). This comprehensive approach catches threats that traditional scanners miss, like renamed secrets, business rule violations, and dangerous shell operations.
+**A**: Traditional security scanning focuses on pattern matching (deterministic layer only). Our 5-layer mesh adds:
+- **Layer 2 (Semantic)**: AST analysis for taint tracking and data flow
+- **Layer 3 (Operational)**: Shell command protection with ShellGuard
+- **Layer 4 (AI Auditor)**: LLM reasoning for complex threats like logic bombs
+- **Layer 5 (Persistence)**: SOC Ledger for audit trails and shadow code detection
+
+This comprehensive approach catches threats that traditional scanners miss, like renamed secrets, multi-hop taint flows, and unauthorized AI modifications.
 
 **Q: Why do we need semantic analysis for AI-generated code?**
 

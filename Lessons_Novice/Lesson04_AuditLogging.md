@@ -6,7 +6,7 @@ Ready to see how we **create tamper-proof security records for human AND AI acti
 
 ### 🎯 What This File Does
 
-The **AuditLogger** (`src/security/core/AuditLogger.ts`) is the **immutable record keeper** that:
+The **AuditLogger** (`src/security_py/core/soc_ledger.py`) is the **immutable record keeper** that:
 
 ```
 🚨 Security Action (Human or AI) → 📋 AuditLogger (Cryptographic Record) → 🔒 Immutable Storage
@@ -167,103 +167,107 @@ async verifyAuditIntegrity(): Promise<boolean> {
 
 Want to see the immutable logging in action? Create this test:
 
-```javascript
-// test_audit_trail.js
-const crypto = require('crypto');
+```python
+# test_audit_trail.py
+import hashlib
+import json
+import uuid
+from datetime import datetime
 
-// Simulate audit event creation
-function createAuditEvent(eventType, developerId, data) {
-  const event = {
-    id: `event_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
-    timestamp: new Date(),
-    eventType,
-    developerId,
-    data,
-    digitalSignature: '', // Would be generated
-    checksum: '' // Would be calculated
-  };
+def create_audit_event(event_type, developer_id, data):
+    """Simulate audit event creation"""
+    event = {
+        "id": f"event_{int(datetime.now().timestamp())}_{uuid.uuid4().hex[:9]}",
+        "timestamp": datetime.now().isoformat(),
+        "event_type": event_type,
+        "developer_id": developer_id,
+        "data": data,
+        "digital_signature": "",  # Would be generated
+        "checksum": ""  # Would be calculated
+    }
 
-  // Simulate checksum calculation
-  const eventString = JSON.stringify(event);
-  const checksum = crypto.createHash('sha256').update(eventString).digest('hex');
-  event.checksum = checksum;
+    # Simulate checksum calculation
+    event_string = json.dumps(event, sort_keys=True)
+    checksum = hashlib.sha256(event_string.encode()).hexdigest()
+    event["checksum"] = checksum
 
-  return event;
-}
+    return event
 
-// Test audit trail
-async function testAuditTrail() {
-  console.log('📋 Creating Audit Trail...');
-  
-  // Simulate security events
-  const events = [
-    createAuditEvent('SCAN_START', 'developer-001', { projectPath: './test_vulnerability.py' }),
-    createAuditEvent('VIOLATION_FOUND', 'developer-001', { 
-      violation: { id: 'vuln_123', severity: 'CRITICAL', category: 'LLM06' }
-    }),
-    createAuditEvent('OVERRIDE', 'developer-001', {
-      override: { violationId: 'vuln_123', businessReason: 'Development testing' }
-    })
-  ];
+def test_audit_trail():
+    """Test audit trail creation and verification"""
+    print("📋 Creating Audit Trail...")
 
-  console.log('🔍 Audit Events Created:');
-  events.forEach((event, i) => {
-    console.log(`${i+1}. [${event.eventType}] ${event.timestamp.toISOString()}`);
-    console.log(`   Developer: ${event.developerId}`);
-    console.log(`   Checksum: ${event.checksum.substring(0, 16)}...`);
-    console.log(`   Data: ${JSON.stringify(event.data)}`);
-    console.log('');
-  });
+    # Simulate security events
+    events = [
+        create_audit_event("SCAN_START", "developer-001", {"project_path": "./test_vulnerability.py"}),
+        create_audit_event("VIOLATION_FOUND", "developer-001", {
+            "violation": {"id": "vuln_123", "severity": "CRITICAL", "category": "LLM06"}
+        }),
+        create_audit_event("OVERRIDE", "developer-001", {
+            "override": {"violation_id": "vuln_123", "business_reason": "Development testing"}
+        })
+    ]
 
-  // Simulate integrity verification
-  console.log('🔐 Verifying Integrity...');
-  let allValid = true;
-  
-  events.forEach(event => {
-    const eventString = JSON.stringify(event);
-    const expectedChecksum = crypto.createHash('sha256').update(eventString).digest('hex');
-    const isValid = event.checksum === expectedChecksum;
-    
-    console.log(`Event ${event.id}: ${isValid ? '✅ Valid' : '❌ Invalid'}`);
-    if (!isValid) allValid = false;
-  });
+    print("🔍 Audit Events Created:")
+    for i, event in enumerate(events, 1):
+        print(f"{i}. [{event['event_type']}] {event['timestamp']}")
+        print(f"   Developer: {event['developer_id']}")
+        print(f"   Checksum: {event['checksum'][:16]}...")
+        print(f"   Data: {json.dumps(event['data'])}")
+        print()
 
-  console.log(`\n📊 Overall Integrity: ${allValid ? '✅ INTACT' : '❌ COMPROMISED'}`);
-}
+    # Simulate integrity verification
+    print("🔐 Verifying Integrity...")
+    all_valid = True
 
-testAuditTrail();
+    for event in events:
+        event_string = json.dumps(event, sort_keys=True)
+        expected_checksum = hashlib.sha256(event_string.encode()).hexdigest()
+        is_valid = event["checksum"] == expected_checksum
+
+        status = "✅ Valid" if is_valid else "❌ Invalid"
+        print(f"Event {event['id']}: {status}")
+        if not is_valid:
+            all_valid = False
+
+    integrity = "✅ INTACT" if all_valid else "❌ COMPROMISED"
+    print(f"\n📊 Overall Integrity: {integrity}")
+
+if __name__ == "__main__":
+    test_audit_trail()
 ```
 
-Run it with: `node test_audit_trail.js`
+Run it with: `python test_audit_trail.py`
 
 ### 🔬 Manual Lab: Tamper Detection
 
 Add this to see what happens when someone tries to tamper:
 
-```javascript
-// Add to test_audit_trail.js after creating events
-console.log('\n🚨 Simulating Tampering...');
+```python
+# Add to test_audit_trail.py after creating events
+print("\n🚨 Simulating Tampering...")
 
-// Tamper with an event
-events[1].data.violation.severity = 'LOW'; // Change CRITICAL to LOW
+# Tamper with an event
+events[1]["data"]["violation"]["severity"] = "LOW"  # Change CRITICAL to LOW
 
-// Recalculate what the checksum SHOULD be
-const tamperedString = JSON.stringify(events[1]);
-const newChecksum = crypto.createHash('sha256').update(tamperedString).digest('hex');
+# Recalculate what the checksum SHOULD be
+tampered_string = json.dumps(events[1], sort_keys=True)
+new_checksum = hashlib.sha256(tampered_string.encode()).hexdigest()
 
-console.log(`Original Checksum: ${events[1].checksum}`);
-console.log(`Expected Checksum: ${newChecksum}`);
-console.log(`Tampered: ${events[1].checksum !== newChecksum ? 'YES 🚨' : 'NO'}`);
+print(f"Original Checksum: {events[1]['checksum']}")
+print(f"Expected Checksum: {new_checksum}")
+tampered = "YES 🚨" if events[1]["checksum"] != new_checksum else "NO"
+print(f"Tampered: {tampered}")
 
-// Verify all events again
-console.log('\n🔐 Post-Tamper Verification:');
-events.forEach(event => {
-  const eventString = JSON.stringify(event);
-  const expectedChecksum = crypto.createHash('sha256').update(eventString).digest('hex');
-  const isValid = event.checksum === expectedChecksum;
-  
-  console.log(`Event ${event.id}: ${isValid ? '✅ Valid' : '❌ TAMPERED'}`);
-});
+# Verify all events again
+print("\n🔐 Post-Tamper Verification:")
+for event in events:
+    event_string = json.dumps(event, sort_keys=True)
+    expected_checksum = hashlib.sha256(event_string.encode()).hexdigest()
+    is_valid = event["checksum"] == expected_checksum
+
+    status = "✅ Valid" if is_valid else "❌ TAMPERED"
+    print(f"Event {event['id']}: {status}")
 ```
 
 ---
